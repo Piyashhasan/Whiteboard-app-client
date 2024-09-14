@@ -1,10 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { AiOutlineSelect } from "react-icons/ai";
-import { IoPencilOutline, IoTriangleOutline } from "react-icons/io5";
-import { LuRectangleHorizontal } from "react-icons/lu";
-import { FaRegCircle } from "react-icons/fa";
-import { CiUndo, CiText } from "react-icons/ci";
-import { RxReset } from "react-icons/rx";
+import { CiUndo } from "react-icons/ci";
+import Tools from "../Tools/Tools";
 
 const Canvas = () => {
   const canvasRef = useRef(null);
@@ -433,75 +429,16 @@ const Canvas = () => {
   return (
     <div className="wrapper">
       <div className="flex items-center justify-center gap-5 my-4">
-        <div className="flex flex-col items-center gap-5 bg-[#F0F0F0] px-5 py-5 rounded-md">
-          <button
-            className="py-1 flex items-center justify-center relative group"
-            onClick={() => setSelectedShape("select")}
-          >
-            <AiOutlineSelect className="text-[28px] text-[#a29898]" />
-            <div className="absolute bottom-full mb-2 hidden group-hover:flex justify-center items-center px-2 py-1 bg-gray-700 text-white text-sm rounded">
-              Select
-            </div>
-          </button>
-          <button
-            className="py-1 flex items-center justify-center relative group"
-            onClick={handleAddText}
-          >
-            <CiText className="text-[28px] text-[#a29898]" />
-            <div className="absolute bottom-full mb-2 hidden group-hover:flex justify-center items-center px-2 py-1 bg-gray-700 text-white text-sm rounded">
-              Text
-            </div>
-          </button>
-          <button
-            className="py-1 flex items-center justify-center relative group"
-            onClick={() => setSelectedShape("line")}
-          >
-            <IoPencilOutline className="text-[28px] text-[#a29898]" />
-            <div className="absolute bottom-full mb-2 hidden group-hover:flex justify-center items-center px-2 py-1 bg-gray-700 text-white text-sm rounded">
-              Pencil
-            </div>
-          </button>
-          <button
-            className="py-1 flex items-center justify-center relative group"
-            onClick={() => setSelectedShape("rectangle")}
-          >
-            <LuRectangleHorizontal className="text-[28px] text-[#a29898]" />
-            <div className="absolute bottom-full mb-2 hidden group-hover:flex justify-center items-center px-2 py-1 bg-gray-700 text-white text-sm rounded">
-              Rectangle
-            </div>
-          </button>
-          <button
-            className="py-1 flex items-center justify-center relative group"
-            onClick={() => setSelectedShape("circle")}
-          >
-            <FaRegCircle className="text-[28px] text-[#a29898]" />
-            <div className="absolute bottom-full mb-2 hidden group-hover:flex justify-center items-center px-2 py-1 bg-gray-700 text-white text-sm rounded">
-              Circle
-            </div>
-          </button>
-          <button
-            className="py-1 flex items-center justify-center relative group"
-            onClick={() => setSelectedShape("triangle")}
-          >
-            <IoTriangleOutline className="text-[28px] text-[#a29898]" />
-            <div className="absolute bottom-full mb-2 hidden group-hover:flex justify-center items-center px-2 py-1 bg-gray-700 text-white text-sm rounded">
-              Triangle
-            </div>
-          </button>
+        <Tools
+          selectedShape={selectedShape}
+          setSelectedShape={setSelectedShape}
+          handleAddText={handleAddText}
+          handleReset={handleReset}
+        />
 
-          <button
-            onClick={() => handleReset()}
-            className="py-1 flex items-center justify-center relative group"
-          >
-            <RxReset className="text-[28px] text-[#a29898]" />
-            <div className="absolute bottom-full mb-2 hidden group-hover:flex justify-center items-center px-2 py-1 bg-gray-700 text-white text-sm rounded">
-              Reset
-            </div>
-          </button>
-        </div>
         <div className="relative">
           <canvas
-            className="border-[3px] border-[#F0F0F0] rounded-md "
+            className="border-[2px] border-[#F0F0F0] rounded-md "
             ref={canvasRef}
             width={1000}
             height={500}
@@ -509,12 +446,12 @@ const Canvas = () => {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
           />
-          <div className="absolute top-0 right-0">
+          <div className="absolute top-0 right-0 z-30">
             <button
               onClick={() => handleUndo()}
               className="p-2 flex items-center justify-center relative group"
             >
-              <CiUndo className="text-[28px] text-[#a29898]" />
+              <CiUndo className="text-[28px] text-[#a29898] hover:text-black" />
               <div className="absolute bottom-full mb-2 hidden group-hover:flex justify-center items-center px-2 py-1 bg-gray-700 text-white text-sm rounded">
                 Undo
               </div>
