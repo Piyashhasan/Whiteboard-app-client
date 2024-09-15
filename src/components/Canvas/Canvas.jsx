@@ -426,37 +426,36 @@ const Canvas = () => {
     redrawElements(ctx);
   }, [elements, redrawElements]);
 
+  console.log("--- elements ---", elements);
   return (
-    <div className="wrapper">
-      <div className="flex items-center justify-center gap-5 my-4">
-        <Tools
-          selectedShape={selectedShape}
-          setSelectedShape={setSelectedShape}
-          handleAddText={handleAddText}
-          handleReset={handleReset}
-        />
+    <div className="flex items-center justify-center gap-5 my-4">
+      <Tools
+        selectedShape={selectedShape}
+        setSelectedShape={setSelectedShape}
+        handleAddText={handleAddText}
+        handleReset={handleReset}
+      />
 
-        <div className="relative">
-          <canvas
-            className="border-[2px] border-[#F0F0F0] rounded-md "
-            ref={canvasRef}
-            width={1000}
-            height={500}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-          />
-          <div className="absolute top-0 right-0 z-30">
-            <button
-              onClick={() => handleUndo()}
-              className="p-2 flex items-center justify-center relative group"
-            >
-              <CiUndo className="text-[28px] text-[#a29898] hover:text-black" />
-              <div className="absolute bottom-full mb-2 hidden group-hover:flex justify-center items-center px-2 py-1 bg-gray-700 text-white text-sm rounded">
-                Undo
-              </div>
-            </button>
-          </div>
+      <div className="relative">
+        <canvas
+          className="border-[2px] border-[#F0F0F0] rounded-md"
+          ref={canvasRef}
+          width={1000}
+          height={500}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+        />
+        <div className="absolute top-0 right-0 z-30">
+          <button
+            onClick={() => handleUndo()}
+            className="p-2 flex items-center justify-center relative group"
+          >
+            <CiUndo className="text-[28px] text-[#a29898] hover:text-black" />
+            <div className="absolute bottom-full mb-2 hidden group-hover:flex justify-center items-center px-2 py-1 bg-gray-700 text-white text-sm rounded">
+              Undo
+            </div>
+          </button>
         </div>
       </div>
     </div>
