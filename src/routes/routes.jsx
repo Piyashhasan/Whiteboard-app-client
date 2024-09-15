@@ -14,17 +14,9 @@ const routes = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "/whiteboard",
+        path: "/whiteboard/:id",
         element: <WhiteBoard />,
       },
-      //   {
-      //     path: "update/:id",
-      //     element: <UpdateUserForm />,
-      //   },
-      //   {
-      //     path: "user-details/:id",
-      //     element: <UserDetails />,
-      //   },
     ],
   },
   {

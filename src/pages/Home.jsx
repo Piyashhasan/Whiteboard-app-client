@@ -1,8 +1,14 @@
+import SearchDrawing from "../components/SearchDrawing/SearchDrawing";
+import DrawingItems from "../components/DrawingItems/DrawingItems";
+import NavBar from "../shared/NavBar/NavBar";
+
 const Home = () => {
   return (
-    <div className="wrapper bg-red-300">
-      <div className="">
-        <h1>List of all drawing...</h1>
+    <div className="wrapper">
+      <NavBar />
+      <div className="py-[30px]">
+        <SearchDrawing />
+        <DrawingItems />
       </div>
     </div>
   );

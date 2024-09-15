@@ -1,12 +1,18 @@
+import { Link } from "react-router-dom";
 import Canvas from "../components/Canvas/Canvas";
 
 const WhiteBoard = () => {
   return (
     <div className="wrapper">
-      <h1 className="text-[26px] text-[#5B5858] text-center pt-5 capitalize font-bold">
-        White Board
-      </h1>
+      <Link to="/">
+        <button className="my-2 bg-blue-500 text-[14px] px-5 py-1 rounded-sm text-white hover:bg-blue-600">
+          Back
+        </button>
+      </Link>
+
+      {/* --- Canvas section start --- */}
       <Canvas />
+      {/* --- Canvas section end --- */}
     </div>
   );
 };

@@ -1,6 +1,12 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { CiUndo } from "react-icons/ci";
 import Tools from "../Tools/Tools";
+import {
+  useGetSingleDrawingsQuery,
+  useUpdateDrawingMutation,
+} from "../../services/appApi";
+import { useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Canvas = () => {
   const canvasRef = useRef(null);
@@ -12,12 +18,41 @@ const Canvas = () => {
   const [selectedElementIndex, setSelectedElementIndex] = useState(null);
   const [initialMousePosition, setInitialMousePosition] = useState(null);
 
-  // Initialize ctx on component mount
+  //   --- update data send to server ---
+  const { id } = useParams();
+  const { data, refetch } = useGetSingleDrawingsQuery(id);
+
+  const [updateDrawing, { isLoading, isSuccess, isError }] =
+    useUpdateDrawingMutation();
+
+  // useEffect(() => {
+  //   const getElementsFromDB = data?.data?.elements;
+  //   console.log(getElementsFromDB);
+  //   if (getElementsFromDB) {
+  //     setElements(getElementsFromDB);
+  //   }
+  // }, [data]);
+
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    ctxRef.current = ctx;
-  }, []);
+    const getElementsFromDB = data?.data?.elements;
+
+    if (getElementsFromDB) {
+      const normalizedElements = getElementsFromDB.map((element) => {
+        if (
+          element.elementType === "text" &&
+          Array.isArray(element.coordinates[0])
+        ) {
+          return {
+            ...element,
+            coordinates: element.coordinates[0],
+          };
+        }
+        return element;
+      });
+
+      setElements(normalizedElements);
+    }
+  }, [data]);
 
   // --- Mouse click down functionality ---
   const handleMouseDown = (e) => {
@@ -31,30 +66,30 @@ const Canvas = () => {
 
     if (selectedShape === "select") {
       const elementIndex = elements.findIndex((element) => {
-        if (element.type === "line") {
+        if (element.elementType === "line") {
           for (let i = 1; i < element.coordinates.length; i++) {
             const [x1, y1] = element.coordinates[i - 1];
             const [x2, y2] = element.coordinates[i];
             const dist = pointToLineDistance(x, y, x1, y1, x2, y2);
             if (dist < 5) return true;
           }
-        } else if (element.type === "rectangle") {
+        } else if (element.elementType === "rectangle") {
           return (
             x > element.startX &&
             x < element.startX + element.width &&
             y > element.startY &&
             y < element.startY + element.height
           );
-        } else if (element.type === "circle") {
+        } else if (element.elementType === "circle") {
           // Circle selection logic
           const dist = Math.sqrt(
             (x - element.startX) ** 2 + (y - element.startY) ** 2
           );
           return dist < element.radius;
-        } else if (element.type === "triangle") {
+        } else if (element.elementType === "triangle") {
           // Triangle selection logic
           return isPointInTriangle(x, y, element);
-        } else if (element.type === "text") {
+        } else if (element.elementType === "text") {
           // Text selection logic
           const textMetrics = ctx.measureText(element.text);
           return (
@@ -79,14 +114,14 @@ const Canvas = () => {
 
     if (selectedShape === "line") {
       setCurrentElement({
-        type: "line",
+        elementType: "line",
         coordinates: [[x, y]],
         color: "#000",
         thickness: 1,
       });
     } else if (selectedShape === "rectangle") {
       setCurrentElement({
-        type: "rectangle",
+        elementType: "rectangle",
         startX: x,
         startY: y,
         width: 0,
@@ -95,7 +130,7 @@ const Canvas = () => {
       });
     } else if (selectedShape === "circle") {
       setCurrentElement({
-        type: "circle",
+        elementType: "circle",
         startX: x,
         startY: y,
         radius: 0,
@@ -103,7 +138,7 @@ const Canvas = () => {
       });
     } else if (selectedShape === "triangle") {
       setCurrentElement({
-        type: "triangle",
+        elementType: "triangle",
         startX: x,
         startY: y,
         color: "#000",
@@ -126,7 +161,7 @@ const Canvas = () => {
       setElements((prevElements) =>
         prevElements.map((element, index) => {
           if (index === selectedElementIndex) {
-            if (element.type === "line") {
+            if (element.elementType === "line") {
               return {
                 ...element,
                 coordinates: element.coordinates.map(([cx, cy]) => [
@@ -134,19 +169,19 @@ const Canvas = () => {
                   cy + dy,
                 ]),
               };
-            } else if (element.type === "rectangle") {
+            } else if (element.elementType === "rectangle") {
               return {
                 ...element,
                 startX: element.startX + dx,
                 startY: element.startY + dy,
               };
-            } else if (element.type === "circle") {
+            } else if (element.elementType === "circle") {
               return {
                 ...element,
                 startX: element.startX + dx,
                 startY: element.startY + dy,
               };
-            } else if (element.type === "triangle") {
+            } else if (element.elementType === "triangle") {
               return {
                 ...element,
                 startX: element.startX + dx,
@@ -154,7 +189,7 @@ const Canvas = () => {
                 endX: element.endX + dx,
                 endY: element.endY + dy,
               };
-            } else if (element.type === "text") {
+            } else if (element.elementType === "text") {
               return {
                 ...element,
                 coordinates: [
@@ -288,7 +323,7 @@ const Canvas = () => {
     const text = prompt("Enter text:");
     if (!text) return;
     const newText = {
-      type: "text",
+      elementType: "text",
       coordinates: [100, 100],
       text: text,
       fontSize: 16,
@@ -316,7 +351,7 @@ const Canvas = () => {
   const redrawElements = useCallback(
     (ctx) => {
       elements.forEach((element) => {
-        if (element.type === "line") {
+        if (element.elementType === "line") {
           ctx.beginPath();
           ctx.moveTo(element.coordinates[0][0], element.coordinates[0][1]);
 
@@ -327,7 +362,7 @@ const Canvas = () => {
           ctx.strokeStyle = element.color;
           ctx.lineWidth = element.thickness;
           ctx.stroke();
-        } else if (element.type === "rectangle") {
+        } else if (element.elementType === "rectangle") {
           ctx.strokeStyle = element.color;
           ctx.strokeRect(
             element.startX,
@@ -335,7 +370,7 @@ const Canvas = () => {
             element.width,
             element.height
           );
-        } else if (element.type === "circle") {
+        } else if (element.elementType === "circle") {
           ctx.beginPath();
           ctx.arc(
             element.startX,
@@ -346,7 +381,7 @@ const Canvas = () => {
           );
           ctx.strokeStyle = element.color;
           ctx.stroke();
-        } else if (element.type === "triangle") {
+        } else if (element.elementType === "triangle") {
           const { startX, startY, endX, endY } = element;
           const midX = (startX + endX) / 2;
           ctx.beginPath();
@@ -356,7 +391,7 @@ const Canvas = () => {
           ctx.closePath();
           ctx.strokeStyle = element.color;
           ctx.stroke();
-        } else if (element.type === "text") {
+        } else if (element.elementType === "text") {
           ctx.font = `${element.fontSize}px Arial`;
           ctx.fillText(
             element.text,
@@ -422,43 +457,80 @@ const Canvas = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
+    ctxRef.current = ctx;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     redrawElements(ctx);
   }, [elements, redrawElements]);
 
-  console.log("--- elements ---", elements);
-  return (
-    <div className="flex items-center justify-center gap-5 my-4">
-      <Tools
-        selectedShape={selectedShape}
-        setSelectedShape={setSelectedShape}
-        handleAddText={handleAddText}
-        handleReset={handleReset}
-      />
+  // --- handle save drawing ---
+  const handleSaveDrawings = () => {
+    updateDrawing({ id, elements })
+      .unwrap()
+      .then(() => {
+        refetch();
+      })
+      .catch((error) => {
+        console.error("Failed to update drawing:", error);
+      });
+  };
 
-      <div className="relative">
-        <canvas
-          className="border-[2px] border-[#F0F0F0] rounded-md"
-          ref={canvasRef}
-          width={1000}
-          height={500}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
+  // --- handle toast ---
+  useEffect(() => {
+    if (isLoading) {
+      toast.loading("Loading ...", { id: "updateDrawing" });
+    }
+    if (!isLoading && !isSuccess && isError) {
+      toast.error("Not update..", { id: "updateDrawing" });
+    }
+    if (isSuccess) {
+      toast.success("Updated... ", { id: "updateDrawing" });
+    }
+  }, [isLoading, isSuccess, isError]);
+
+  return (
+    <>
+      <div className="flex items-center justify-center gap-5 my-4">
+        <Tools
+          selectedShape={selectedShape}
+          setSelectedShape={setSelectedShape}
+          handleAddText={handleAddText}
+          handleReset={handleReset}
         />
-        <div className="absolute top-0 right-0 z-30">
-          <button
-            onClick={() => handleUndo()}
-            className="p-2 flex items-center justify-center relative group"
-          >
-            <CiUndo className="text-[28px] text-[#a29898] hover:text-black" />
-            <div className="absolute bottom-full mb-2 hidden group-hover:flex justify-center items-center px-2 py-1 bg-gray-700 text-white text-sm rounded">
-              Undo
+
+        <div>
+          <div className="flex justify-end">
+            <div className="bg-[#F0F0F0] flex justify-center py-2 w-52 gap-5 rounded-md">
+              <button
+                onClick={() => handleUndo()}
+                className="flex items-center justify-center relative group"
+              >
+                <CiUndo className="text-[28px] text-[#a29898] hover:text-black" />
+                <div className="absolute bottom-full mb-2 hidden group-hover:flex justify-center items-center px-2 py-1 bg-gray-700 text-white text-sm rounded">
+                  Undo
+                </div>
+              </button>
+              <button
+                onClick={handleSaveDrawings}
+                className="bg-blue-500 text-[12px] px-5 rounded-sm text-white hover:bg-blue-600"
+              >
+                Save
+              </button>
             </div>
-          </button>
+          </div>
+
+          <canvas
+            className="border-[2px] border-[#F0F0F0] rounded-md mt-1"
+            ref={canvasRef}
+            width={1000}
+            height={500}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+          />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
