@@ -16,10 +16,10 @@ export const appApi = createApi({
     }),
 
     createDrawing: builder.mutation({
-      query: (name) => ({
+      query: (payload) => ({
         url: "/drawings",
         method: "POST",
-        body: { name },
+        body: payload,
       }),
       invalidatesTags: ["Drawings"],
     }),
@@ -31,6 +31,15 @@ export const appApi = createApi({
         body: { elements },
       }),
     }),
+
+    deleteDrawing: builder.mutation({
+      query: (id) => ({
+        url: `/drawings/${id}`,
+        method: "DELETE",
+        body: { id },
+      }),
+      invalidatesTags: ["Drawings"],
+    }),
   }),
 });
 
@@ -39,4 +48,5 @@ export const {
   useGetSingleDrawingsQuery,
   useCreateDrawingMutation,
   useUpdateDrawingMutation,
+  useDeleteDrawingMutation,
 } = appApi;

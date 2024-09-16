@@ -14,25 +14,21 @@ const Canvas = () => {
   const [elements, setElements] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentElement, setCurrentElement] = useState(null);
-  const [selectedShape, setSelectedShape] = useState("line");
+  const [selectedShape, setSelectedShape] = useState("");
   const [selectedElementIndex, setSelectedElementIndex] = useState(null);
   const [initialMousePosition, setInitialMousePosition] = useState(null);
 
   //   --- update data send to server ---
   const { id } = useParams();
+
+  // --- Get single drawing query ---
   const { data, refetch } = useGetSingleDrawingsQuery(id);
 
+  // --- Update drawing query ---
   const [updateDrawing, { isLoading, isSuccess, isError }] =
     useUpdateDrawingMutation();
 
-  // useEffect(() => {
-  //   const getElementsFromDB = data?.data?.elements;
-  //   console.log(getElementsFromDB);
-  //   if (getElementsFromDB) {
-  //     setElements(getElementsFromDB);
-  //   }
-  // }, [data]);
-
+  // --- Single drawing value set functionality---
   useEffect(() => {
     const getElementsFromDB = data?.data?.elements;
 
@@ -64,6 +60,10 @@ const Canvas = () => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
+    if (!selectedShape) {
+      return;
+    }
+
     if (selectedShape === "select") {
       const elementIndex = elements.findIndex((element) => {
         if (element.elementType === "line") {
@@ -81,16 +81,16 @@ const Canvas = () => {
             y < element.startY + element.height
           );
         } else if (element.elementType === "circle") {
-          // Circle selection logic
+          // circle selection logic
           const dist = Math.sqrt(
             (x - element.startX) ** 2 + (y - element.startY) ** 2
           );
           return dist < element.radius;
         } else if (element.elementType === "triangle") {
-          // Triangle selection logic
+          // triangle selection logic
           return isPointInTriangle(x, y, element);
         } else if (element.elementType === "text") {
-          // Text selection logic
+          // text selection logic
           const textMetrics = ctx.measureText(element.text);
           return (
             x > element.coordinates[0] &&
@@ -112,6 +112,7 @@ const Canvas = () => {
       return;
     }
 
+    // set drawing based on shape
     if (selectedShape === "line") {
       setCurrentElement({
         elementType: "line",
@@ -241,7 +242,7 @@ const Canvas = () => {
           height: y - prevElement.startY,
         };
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas and redraw
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // clear canvas and redraw
         redrawElements(ctx);
         ctx.strokeStyle = newElement.color;
         ctx.strokeRect(
@@ -262,7 +263,7 @@ const Canvas = () => {
           ),
         };
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas and redraw
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // clear canvas and redraw
         redrawElements(ctx);
         ctx.beginPath();
         ctx.arc(
@@ -285,15 +286,15 @@ const Canvas = () => {
           endY: y,
         };
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas and redraw
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // clear canvas and redraw
         redrawElements(ctx);
 
         const { startX, startY, endX, endY } = newElement;
         const midX = (startX + endX) / 2;
         ctx.beginPath();
-        ctx.moveTo(midX, startY); // Top vertex
-        ctx.lineTo(startX, endY); // Bottom left vertex
-        ctx.lineTo(endX, endY); // Bottom right vertex
+        ctx.moveTo(midX, startY); // top vertex
+        ctx.lineTo(startX, endY); // bottom left vertex
+        ctx.lineTo(endX, endY); // bottom right vertex
         ctx.closePath();
         ctx.strokeStyle = newElement.color;
         ctx.stroke();
@@ -433,11 +434,11 @@ const Canvas = () => {
     const { startX, startY, endX, endY } = triangle;
 
     // --- Calculate the vertices of the triangle ---
-    const x0 = (startX + endX) / 2; // The top point (mid-point of the base)
+    const x0 = (startX + endX) / 2; // the top point (mid-point of the base)
     const y0 = startY;
-    const x1 = startX; // Bottom-left corner
+    const x1 = startX; // bottom-left corner
     const y1 = endY;
-    const x2 = endX; // Bottom-right corner
+    const x2 = endX; // bottom-right corner
     const y2 = endY;
 
     const sign = (x1, y1, x2, y2, px, py) => {
