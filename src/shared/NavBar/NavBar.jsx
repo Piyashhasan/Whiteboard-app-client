@@ -9,7 +9,7 @@ const NavBar = () => {
     <nav className="wrapper bg-[#F0F0F0] my-5 rounded-[35px]">
       <div className="flex items-center justify-between px-5 py-3 ">
         <Link to="/">
-          <h1 className="text-[18px] text-[#FFC82D] text-center capitalize font-bold">
+          <h1 className="text-[18px] text-black text-center capitalize font-bold">
             CanvasCloud
           </h1>
         </Link>

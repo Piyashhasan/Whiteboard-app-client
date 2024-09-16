@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 
 const DrawingItems = () => {
   // --- Get all Drawing ---
-  const { data } = useGetAllDrawingsQuery();
+  const { data, isLoading: loading } = useGetAllDrawingsQuery();
   const drawingItem = data?.data;
 
   // --- Delete drawing query ---
@@ -37,9 +37,12 @@ const DrawingItems = () => {
     }
   }, [isLoading, isSuccess, isError]);
 
+  if (loading) {
+    return <p className="text-[28px] text-center">Loading ...</p>;
+  }
   return (
     <div className="">
-      <div className="grid grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
         {drawingItem?.map((item) => {
           return (
             <div key={item?._id} className="bg-[#86ECB6] p-5 rounded-md">

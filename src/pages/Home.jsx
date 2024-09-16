@@ -4,9 +4,11 @@ import NavBar from "../shared/NavBar/NavBar";
 const Home = () => {
   return (
     <div className="wrapper">
-      <NavBar />
-      <div className="py-[30px]">
-        <DrawingItems />
+      <div className="px-4 xl:px-0">
+        <NavBar />
+        <div className="py-[30px]">
+          <DrawingItems />
+        </div>
       </div>
     </div>
   );

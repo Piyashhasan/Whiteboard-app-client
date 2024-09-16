@@ -13,7 +13,7 @@ const CreateDrawingForm = ({ setVisible }) => {
     useCreateDrawingMutation();
 
   // --- Form submission handler ---
-  const handleFromSubmit = (e) => {
+  const handleFromSubmit = async (e) => {
     e.preventDefault();
     const fileName = drawingName
       .toLocaleLowerCase()
@@ -26,7 +26,7 @@ const CreateDrawingForm = ({ setVisible }) => {
         ...(includeElements === "yes" && { elements }),
       };
 
-      createDrawing(payload);
+      await createDrawing(payload);
       setVisible(false);
     }
 
@@ -38,8 +38,8 @@ const CreateDrawingForm = ({ setVisible }) => {
     if (isLoading) {
       toast.loading("Loading ...", { id: "createDrawing" });
     }
-    if (!isLoading && !isSuccess && isError) {
-      toast.error("Drawing not added..", { id: "createDrawing" });
+    if (!isLoading && isError) {
+      toast.error("Drawing not added.", { id: "createDrawing" });
     }
     if (isSuccess) {
       toast.success("Successfully created drawing!", { id: "createDrawing" });
